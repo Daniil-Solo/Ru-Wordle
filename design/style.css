@@ -1,0 +1,25 @@
+.container{
+    margin: 0 auto;
+    max-width: 1200px;
+}
+.top-menu{
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.divider{
+    margin: 8px 0;
+    border: 1px solid #eee;
+}
+.btn{
+    padding: 4px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.heading{
+    font-weight: 600;
+    font-size: 20pt;
+}
