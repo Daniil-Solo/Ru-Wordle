@@ -45,6 +45,19 @@
     font-weight: 600;
 }
 
+.words__row__item.success{
+    background-color: #4cd964;
+    color: #FFF;
+}
+.words__row__item.active{
+    background-color: #f1c40f;
+    color: #FFF;
+}
+.words__row__item.disabled{
+    background-color: #757575;
+    color: #FFF;
+}
+
 @media (min-width: 0) and (max-width: 375px){
     .words__row__item{
         width: 50px;
