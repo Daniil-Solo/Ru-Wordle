@@ -1,3 +1,14 @@
+body{
+    display: flex;
+    flex-direction: column;
+}
+main{
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
 .container{
     margin: 0 auto;
     max-width: 1200px;
@@ -51,7 +62,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    row-gap: 8px;
+    row-gap: 4px;
 }
 .keyboard__row{
     display: flex;
@@ -76,7 +87,7 @@
     }
     .keyboard__row__item{
         width: 20px;
-        height: 25px;
+        height: 28px;
         font-size: 16px;
     }
 
@@ -89,7 +100,7 @@
     }
     .keyboard__row__item{
         width: 25px;
-        height: 30px;
+        height: 33px;
         font-size: 18px;
     }
 }
@@ -101,7 +112,7 @@
     }
     .keyboard__row__item{
         width: 30px;
-        height: 35px;
+        height: 38px;
         font-size: 20px;
     }
 }
@@ -113,7 +124,7 @@
     }
     .keyboard__row__item{
         width: 40px;
-        height: 45px;
+        height: 48px;
         font-size: 24px;
     }
 }
