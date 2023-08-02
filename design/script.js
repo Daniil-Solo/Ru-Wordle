@@ -1,5 +1,5 @@
 const tryingCount = 6
-
+const colorTypes = ["success", "disabled", "active"]
 
 function checkWordAndGetColors(word){
     console.log(`Handling ${word} on server`)
@@ -30,44 +30,73 @@ class WordsView{
         this.tryingNumber = 1
         this.currentWord = new CurrentWord()
         this.colorSchema = colorSchema
+        this.showCurrentCell()
     }
 
     startNextTrying(){
         if (this.tryingNumber < tryingCount){
+            this.paintCells()
             this.tryingNumber += 1
             this.currentWord.clear()
+            this.showCurrentCell()
         } else {
             alert("Game over")
         }
     }
 
-    updateView(){
-        const wordElements = document.querySelectorAll(".words__row")
-        let symbolElements = [...wordElements[this.tryingNumber - 1].children]
-        symbolElements.forEach((symbolElement, index) => {
+    renderCurrentWord(){
+        this.showCurrentText()
+        this.showCurrentCell()
+    }
+
+    getCurrentCells(){
+        const wordRows = document.querySelectorAll(".words__row")
+        const currentCells = [...wordRows[this.tryingNumber - 1].children]
+        return currentCells
+    }
+
+    showCurrentCell(){
+        const currentCells = this.getCurrentCells()
+        currentCells.forEach((currentCell, index) => {
+            currentCell.classList.remove("current")
+            if (index === this.currentWord.index){
+                currentCell.classList.add("current")
+            } 
+        })
+    }
+
+    showCurrentText(){
+        const currentCells = this.getCurrentCells()
+        currentCells.forEach((currentCell, index) => {
+            let currentSymbol = this.currentWord.data[index]
+            currentCell.innerHTML = currentSymbol
+        })
+    }
+    
+    paintCells(){
+        const currentCells = this.getCurrentCells()
+        currentCells.forEach((currentCell, index) => {
             let currentSymbol = this.currentWord.data[index]
             let color = this.colorSchema.getColorBySymbol(currentSymbol)
             if (color !== undefined){
-                symbolElement.classList.add(color)
-            } 
-            symbolElement.innerHTML = currentSymbol
+                currentCell.classList.remove(...colorTypes)
+                currentCell.classList.add(color)
+            }
         })
     }
 
     showErrorWhereEmptySymbols(){
-        const wordElements = document.querySelectorAll(".words__row")
-        let symbolElements = [...wordElements[this.tryingNumber - 1].children]
+        const currentCells = this.getCurrentCells()
         this.currentWord.data.forEach((currentSymbol, index) => {
             if (currentSymbol === ""){
-                symbolElements[index].classList.add("empty_symbol_error")
+                currentCells[index].classList.add("empty_symbol_error")
                 setTimeout(() => {
-                    symbolElements[index].classList.remove("empty_symbol_error")
+                    currentCells[index].classList.remove("empty_symbol_error")
                 }, 500)
                 
             }
         })
     }
-
 }
 
 class KeyboardView{
@@ -75,7 +104,7 @@ class KeyboardView{
         this.colorSchema = colorSchema
     }
 
-    updateView(){
+    paintCells(){
         const keyElements = document.querySelectorAll(".keyboard__row__item")
         keyElements.forEach(keyElement => {
             let currentSymbol = keyElement.innerText
@@ -136,8 +165,7 @@ buttons.forEach(button => {
                 if (wordView.currentWord.isReadyToCheck()){
                     let colors = checkWordAndGetColors(wordView.currentWord.getText())
                     colorSchema.updateColors(colors)
-                    keyboardView.updateView()
-                    wordView.updateView()
+                    keyboardView.paintCells()
                     wordView.startNextTrying()
                 } else {
                     wordView.showErrorWhereEmptySymbols()
@@ -145,16 +173,16 @@ buttons.forEach(button => {
                 break
             case "clear":
                 wordView.currentWord.clear()
-                wordView.updateView()
+                wordView.renderCurrentWord()
                 break
             case "delete":
                 wordView.currentWord.deleteRightSymbol()
-                wordView.updateView()
+                wordView.renderCurrentWord()
                 break  
             default:
                 let symbol = event.srcElement.innerText
                 wordView.currentWord.addSymbol(symbol)
-                wordView.updateView()
+                wordView.renderCurrentWord()
         }
     })
 });
