@@ -1,4 +1,28 @@
-let trying_number = 1
+const tryingCount = 6
+
+class WordsView{
+    constructor(){
+        this.tryingNumber = 1
+        this.currentWord = new CurrentWord()
+    }
+
+    startNextTrying(){
+        if (this.tryingNumber < tryingCount){
+            this.tryingNumber += 1
+            this.currentWord.clear()
+        } else {
+            alert("Game over")
+        }
+    }
+
+    updateView(){
+        const wordElements = document.querySelectorAll(".words__row")
+        let symbolElements = [...wordElements[this.tryingNumber - 1].children]
+        symbolElements.forEach((symbolElement, index) => {
+            symbolElement.innerHTML = this.currentWord.data[index]
+        })
+    }
+}
 
 class CurrentWord {
     constructor(n_symbols = 5){
@@ -32,7 +56,7 @@ class CurrentWord {
     }
 }
 
-let current_word = new CurrentWord()
+let wordView = new WordsView()
 
 
 buttons = document.querySelectorAll(".keyboard__row__item")
@@ -42,13 +66,20 @@ buttons.forEach(button => {
         switch(buttonType){
             case "check":
                 alert("checking")
+                wordView.startNextTrying()
                 break
             case "clear":
-                current_word.clear()
+                wordView.currentWord.clear()
+                wordView.updateView()
                 break
+            case "delete":
+                wordView.currentWord.deleteRightSymbol()
+                wordView.updateView()
+                break  
             default:
                 let symbol = event.srcElement.innerText
-                current_word.addSymbol(symbol)
+                wordView.currentWord.addSymbol(symbol)
+                wordView.updateView()
         }
     })
 });
