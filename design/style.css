@@ -76,7 +76,19 @@ main{
     border-radius: 4px;
     font-weight: 500;
     background-color: #adb5bd;
+    cursor: pointer;
 }
+.keyboard__row__item:active, 
+.keyboard__row__item:hover{
+    outline: 1px solid #5e5858;
+}
+.unselectable{
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+ }
 
 /* медиа-запросы */
 @media (min-width: 0) and (max-width: 375px){
