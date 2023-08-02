@@ -53,6 +53,21 @@ class WordsView{
             symbolElement.innerHTML = currentSymbol
         })
     }
+
+    showErrorWhereEmptySymbols(){
+        const wordElements = document.querySelectorAll(".words__row")
+        let symbolElements = [...wordElements[this.tryingNumber - 1].children]
+        this.currentWord.data.forEach((currentSymbol, index) => {
+            if (currentSymbol === ""){
+                symbolElements[index].classList.add("empty_symbol_error")
+                setTimeout(() => {
+                    symbolElements[index].classList.remove("empty_symbol_error")
+                }, 500)
+                
+            }
+        })
+    }
+
 }
 
 class KeyboardView{
@@ -78,6 +93,10 @@ class CurrentWord {
         this.index = null
         this.data = null
         this.clear()
+    }
+
+    isReadyToCheck(){
+        return this.getText().length === this.n_symbols
     }
 
     getText(){
@@ -114,11 +133,15 @@ buttons.forEach(button => {
         let buttonType = button.dataset?.action
         switch(buttonType){
             case "check":
-                let colors = checkWordAndGetColors(wordView.currentWord.getText())
-                colorSchema.updateColors(colors)
-                keyboardView.updateView()
-                wordView.updateView()
-                wordView.startNextTrying()
+                if (wordView.currentWord.isReadyToCheck()){
+                    let colors = checkWordAndGetColors(wordView.currentWord.getText())
+                    colorSchema.updateColors(colors)
+                    keyboardView.updateView()
+                    wordView.updateView()
+                    wordView.startNextTrying()
+                } else {
+                    wordView.showErrorWhereEmptySymbols()
+                }
                 break
             case "clear":
                 wordView.currentWord.clear()

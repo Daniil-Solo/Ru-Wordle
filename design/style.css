@@ -55,7 +55,16 @@ main{
     border-radius: 4px;
     font-weight: 600;
 }
-
+@keyframes wiggle {
+   25% { transform: rotate(0deg); }
+   50% { transform: rotate(5deg); }
+   75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+.empty_symbol_error {
+    animation: wiggle 0.3s;
+    border-color: red;
+}
 
 /* Клавиатура */
 .keyboard{
