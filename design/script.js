@@ -1,9 +1,35 @@
 const tryingCount = 6
 
-class WordsView{
+
+function checkWordAndGetColors(word){
+    console.log(`Handling ${word} on server`)
+    return {
+        "Й": "success",
+        "О": "disabled",
+        "Ш": "active"
+    }
+}
+
+
+class ColorSchema{
     constructor(){
+        this.data = {}
+    }
+
+    updateColors(newColorSchema){
+        this.data = {...this.data, ...newColorSchema}
+    }
+
+    getColorBySymbol(symbol){
+        return this.data[symbol]
+    }
+}
+
+class WordsView{
+    constructor(colorSchema){
         this.tryingNumber = 1
         this.currentWord = new CurrentWord()
+        this.colorSchema = colorSchema
     }
 
     startNextTrying(){
@@ -19,7 +45,29 @@ class WordsView{
         const wordElements = document.querySelectorAll(".words__row")
         let symbolElements = [...wordElements[this.tryingNumber - 1].children]
         symbolElements.forEach((symbolElement, index) => {
-            symbolElement.innerHTML = this.currentWord.data[index]
+            let currentSymbol = this.currentWord.data[index]
+            let color = this.colorSchema.getColorBySymbol(currentSymbol)
+            if (color !== undefined){
+                symbolElement.classList.add(color)
+            } 
+            symbolElement.innerHTML = currentSymbol
+        })
+    }
+}
+
+class KeyboardView{
+    constructor(colorSchema){
+        this.colorSchema = colorSchema
+    }
+
+    updateView(){
+        const keyElements = document.querySelectorAll(".keyboard__row__item")
+        keyElements.forEach(keyElement => {
+            let currentSymbol = keyElement.innerText
+            let color = this.colorSchema.getColorBySymbol(currentSymbol)
+            if (color !== undefined){
+                keyElement.classList.add(color)
+            } 
         })
     }
 }
@@ -56,8 +104,9 @@ class CurrentWord {
     }
 }
 
-let wordView = new WordsView()
-
+let colorSchema = new ColorSchema()
+let wordView = new WordsView(colorSchema)
+let keyboardView = new KeyboardView(colorSchema)
 
 buttons = document.querySelectorAll(".keyboard__row__item")
 buttons.forEach(button => {
@@ -65,7 +114,10 @@ buttons.forEach(button => {
         let buttonType = button.dataset?.action
         switch(buttonType){
             case "check":
-                alert("checking")
+                let colors = checkWordAndGetColors(wordView.currentWord.getText())
+                colorSchema.updateColors(colors)
+                keyboardView.updateView()
+                wordView.updateView()
                 wordView.startNextTrying()
                 break
             case "clear":
