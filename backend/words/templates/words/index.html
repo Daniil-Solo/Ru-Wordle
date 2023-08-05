@@ -1,0 +1,201 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+    <title>Wordle на русском</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <ul class="top-menu">
+                <li class="top-menu-item">
+                    <button class="btn">
+                        <svg  focusable="false" viewBox="0 0 24 24" width="24px" height="24px">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z">
+                            </path>
+                        </svg>
+                    </button>
+                </li>
+                <li class="top-menu-item">
+                    <h1 class="heading">Wordle на русском</h1>
+                </li>
+                <li class="top-menu-item">
+                    <button class="btn">
+                        <svg viewBox="0 0 24 24" width="24px" height="24px">
+                            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z">
+                            </path>
+                        </svg>
+                    </button>
+                </li>
+            </ul>
+            <hr class="divider">
+        </div>
+    </header>
+    <main>
+        <section>
+            <div class="container">
+                <div class="words unselectable">
+                    <div class="words__row">
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                    </div>
+                    <div class="words__row">
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                    </div>
+                    <div class="words__row">
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                    </div>
+                    <div class="words__row">
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                    </div>
+                    <div class="words__row">
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                    </div>
+                    <div class="words__row">
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                        <div class="words__row__item">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section>
+            <div class="container">
+                <div class="keyboard unselectable">
+                    <div class="keyboard__row">
+                        <div class="keyboard__row__item">Й</div>
+                        <div class="keyboard__row__item">Ц</div>
+                        <div class="keyboard__row__item">У</div>
+                        <div class="keyboard__row__item">К</div>
+                        <div class="keyboard__row__item">Е</div>
+                        <div class="keyboard__row__item">Н</div>
+                        <div class="keyboard__row__item">Г</div>
+                        <div class="keyboard__row__item">Ш</div>
+                        <div class="keyboard__row__item">Щ</div>
+                        <div class="keyboard__row__item">З</div>
+                        <div class="keyboard__row__item">Х</div>
+                        <div class="keyboard__row__item">Ъ</div>
+                    </div>
+                    <div class="keyboard__row">
+                        <div class="keyboard__row__item">Ф</div>
+                        <div class="keyboard__row__item">Ы</div>
+                        <div class="keyboard__row__item">В</div>
+                        <div class="keyboard__row__item">А</div>
+                        <div class="keyboard__row__item">П</div>
+                        <div class="keyboard__row__item">Р</div>
+                        <div class="keyboard__row__item">О</div>
+                        <div class="keyboard__row__item">Л</div>
+                        <div class="keyboard__row__item">Д</div>
+                        <div class="keyboard__row__item">Ж</div>
+                        <div class="keyboard__row__item">Э</div>
+                        <div class="keyboard__row__item" data-action="check">✔</div>
+                    </div>
+                    <div class="keyboard__row">
+                        <div class="keyboard__row__item" data-action="clear">✖</div>
+                        <div class="keyboard__row__item">Я</div>
+                        <div class="keyboard__row__item">Ч</div>
+                        <div class="keyboard__row__item">С</div>
+                        <div class="keyboard__row__item">М</div>
+                        <div class="keyboard__row__item">И</div>
+                        <div class="keyboard__row__item">Т</div>
+                        <div class="keyboard__row__item">Ь</div>
+                        <div class="keyboard__row__item">Б</div>
+                        <div class="keyboard__row__item">Ю</div>
+                        <div class="keyboard__row__item" data-action="delete">⬅</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+
+    </footer>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
