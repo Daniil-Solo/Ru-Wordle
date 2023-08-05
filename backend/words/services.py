@@ -22,9 +22,23 @@ class GameService:
         game = Game.objects.get(id=game_id)
         game.status = Game.Status.VICTORY
         game.save()
+        redis_storage.delete(game_id)
 
     @staticmethod
-    def check_word(game_id: str, word: str) -> bool:
+    def check_word(game_id: str, word: str) -> tuple[bool, list[dict[str: str]]]:
         cached_word = redis_storage.get(game_id).decode()
-        print(cached_word, word)
-        return cached_word == word
+        letters_with_status = GameService.get_letters_with_status(cached_word, word)
+        return cached_word == word, letters_with_status
+
+    @staticmethod
+    def get_letters_with_status(true_word, possible_word) -> list[dict[str: str]]:
+        letters = []
+        for (idx, letter) in enumerate(possible_word):
+            letter_data = dict(letter=letter, color="disabled")
+            if letter in true_word and letter == true_word[idx]:
+                letter_data["color"] = "success"
+            elif letter in true_word and letter != true_word[idx] \
+                    and possible_word[:idx+1].count(letter) <= true_word.count(letter):
+                letter_data["color"] = "active"
+            letters.append(letter_data)
+        return letters

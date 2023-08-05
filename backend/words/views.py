@@ -17,17 +17,20 @@ def check_word(request):
         word = request.GET["word"]
     except KeyError:
         return JsonResponse({"message": "Не отправлено слово!"}, status=400)
+
     try:
         game_id = request.COOKIES["game_id"]
-        success, color_data = GameService.check_word(game_id, word)
-        if success:
-            GameService.set_victory_status(game_id)
-            response = JsonResponse({"message": "Победа!"})
-        else:
-            response = JsonResponse({"message": "Задумано другое слово!", "color_data": color_data})
-        return response
     except KeyError:
         return JsonResponse({"message": "Игры не существует или она уже закончилась!"}, status=400)
+
+    success, letters_with_status = GameService.check_word(game_id, word)
+    if success:
+        GameService.set_victory_status(game_id)
+        response = JsonResponse({"message": "Победа!"})
+        response.delete_cookie(game_id)
+    else:
+        response = JsonResponse({"message": "Задумано другое слово!", "letters": letters_with_status})
+    return response
 
 
 def home_page(request):
