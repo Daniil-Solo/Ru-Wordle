@@ -1,28 +1,123 @@
 const tryingCount = 6
 const colorTypes = ["success", "disabled", "active"]
 
-function checkWordAndGetColors(word){
-    console.log(`Handling ${word} on server`)
-    return {
-        "Й": "success",
-        "О": "disabled",
-        "Ш": "active"
+class Game{
+    constructor(){
+        this.apiHandler = new APIHandler()
+        this.colorSchema = new ColorSchema()
+        this.wordView = new WordsView(this.colorSchema)
+        this.keyboardView = new KeyboardView(this.colorSchema)
+        this.addEventListeners()
+        this.start()
+    }
+    start(){
+        this.apiHandler.start_new_game()
+    }
+    async checkWord(){
+        const word = this.wordView.currentWord.getText()
+        const {status, data} = await this.apiHandler.checkWord(word)
+        if (status === 200){
+            return data
+        } else {
+            throw new Error(data.message)
+        }
+
+    }
+    addEventListeners(){
+        const buttons = document.querySelectorAll(".keyboard__row__item")
+        buttons.forEach(button => {
+            button.addEventListener("click", async event => {
+                let buttonType = button.dataset?.action
+                switch(buttonType){
+                    case "check":
+                        if (this.wordView.currentWord.isReadyToCheck()){
+                            try{
+                                let result = await this.checkWord()
+                                this.colorSchema.updateColors(result.letters)
+                                this.keyboardView.paintCells()
+                                this.wordView.paintCells()
+                                switch (result.game_status){
+                                    case "loss":
+                                        alert(result.message)
+                                        break
+                                    case "victory":
+                                        alert(result.message)
+                                        break
+                                    case "continues":
+                                        this.wordView.startNextTrying()
+                                }
+                            } catch(e){
+                                alert(e.message)
+                            }
+                        } else {
+                            this.wordView.showErrorWhereEmptySymbols()
+                        }
+                        break
+                    case "clear":
+                        this.wordView.currentWord.clear()
+                        this.wordView.renderCurrentWord()
+                        break
+                    case "delete":
+                        this.wordView.currentWord.deleteRightSymbol()
+                        this.wordView.renderCurrentWord()
+                        break
+                    default:
+                        let symbol = event.srcElement.innerText
+                        this.wordView.currentWord.addSymbol(symbol)
+                        this.wordView.renderCurrentWord()
+                }
+            })
+        });
     }
 }
 
+class APIHandler{
+    constructor(){}
+
+    async start_new_game(){
+        let response = await fetch('/start_new_game/', {
+            method: 'POST'
+        })
+        let data = await response.json()
+        return {status: response.status, data: data}
+    }
+
+    async checkWord(word){
+        let response = await fetch(`/check_word?word=${word}`, {
+            method: 'GET'
+        })
+        let data = await response.json()
+        return {status: response.status, data: data}
+    }
+}
 
 class ColorSchema{
     constructor(){
         this.data = {}
+        this.current_word_colors = null
     }
 
-    updateColors(newColorSchema){
-        this.data = {...this.data, ...newColorSchema}
+    updateColors(items){
+        this.current_word_colors = items
+        items.forEach(item => {
+            if (!(item.letter.toUpperCase() in this.data)){
+                this.data[item.letter.toUpperCase()] = item.color
+            } else if (this.data[item.letter.toUpperCase()] === "disabled" && (item.color === "active" || item.color === "success")){
+                this.data[item.letter.toUpperCase()] = item.color
+            } else if (this.data[item.letter.toUpperCase()] === "active" &&  item.color === "success"){
+                this.data[item.letter.toUpperCase()] = item.color
+            }
+        })
     }
 
     getColorBySymbol(symbol){
         return this.data[symbol]
     }
+
+    getColorByPositionInWord(position){
+        return this.current_word_colors[position].color
+    }
+
 }
 
 class WordsView{
@@ -35,12 +130,9 @@ class WordsView{
 
     startNextTrying(){
         if (this.tryingNumber < tryingCount){
-            this.paintCells()
             this.tryingNumber += 1
             this.currentWord.clear()
             this.showCurrentCell()
-        } else {
-            alert("Game over")
         }
     }
 
@@ -77,7 +169,7 @@ class WordsView{
         const currentCells = this.getCurrentCells()
         currentCells.forEach((currentCell, index) => {
             let currentSymbol = this.currentWord.data[index]
-            let color = this.colorSchema.getColorBySymbol(currentSymbol)
+            let color = this.colorSchema.getColorByPositionInWord(index)
             if (color !== undefined){
                 currentCell.classList.remove(...colorTypes)
                 currentCell.classList.add(color)
@@ -129,7 +221,7 @@ class CurrentWord {
     }
 
     getText(){
-        return this.data.join("")
+        return this.data.join("").toLowerCase()
     }
 
     clear(){
@@ -152,37 +244,4 @@ class CurrentWord {
     }
 }
 
-let colorSchema = new ColorSchema()
-let wordView = new WordsView(colorSchema)
-let keyboardView = new KeyboardView(colorSchema)
-
-buttons = document.querySelectorAll(".keyboard__row__item")
-buttons.forEach(button => {
-    button.addEventListener("click", event => {
-        let buttonType = button.dataset?.action
-        switch(buttonType){
-            case "check":
-                if (wordView.currentWord.isReadyToCheck()){
-                    let colors = checkWordAndGetColors(wordView.currentWord.getText())
-                    colorSchema.updateColors(colors)
-                    keyboardView.paintCells()
-                    wordView.startNextTrying()
-                } else {
-                    wordView.showErrorWhereEmptySymbols()
-                }
-                break
-            case "clear":
-                wordView.currentWord.clear()
-                wordView.renderCurrentWord()
-                break
-            case "delete":
-                wordView.currentWord.deleteRightSymbol()
-                wordView.renderCurrentWord()
-                break  
-            default:
-                let symbol = event.srcElement.innerText
-                wordView.currentWord.addSymbol(symbol)
-                wordView.renderCurrentWord()
-        }
-    })
-});
+game = new Game()
