@@ -67,3 +67,16 @@ class GameServiceTestCase(SimpleTestCase):
             dict(letter="о", color="disabled"),
         ]
         self.assertListEqual(letters, right_letters)
+
+    def test_almost_different_letters_different_order(self):
+        true_word = "башня"
+        possible_word = "ааааа"
+        letters = GameService.get_letters_with_status(true_word, possible_word)
+        right_letters = [
+            dict(letter="а", color="disabled"),
+            dict(letter="а", color="success"),
+            dict(letter="а", color="disabled"),
+            dict(letter="а", color="disabled"),
+            dict(letter="а", color="disabled"),
+        ]
+        self.assertListEqual(letters, right_letters)

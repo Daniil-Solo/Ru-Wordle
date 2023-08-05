@@ -71,12 +71,21 @@ class GameService:
     @staticmethod
     def get_letters_with_status(true_word, possible_word) -> list[dict[str: str]]:
         letters = []
+        possible_active_letter_positions = []
         for (idx, letter) in enumerate(possible_word):
             letter_data = dict(letter=letter, color="disabled")
             if letter in true_word and letter == true_word[idx]:
                 letter_data["color"] = "success"
-            elif letter in true_word and letter != true_word[idx] \
-                    and possible_word[:idx+1].count(letter) <= true_word.count(letter):
-                letter_data["color"] = "active"
+            elif letter in true_word and letter != true_word[idx]:
+                possible_active_letter_positions.append(idx)
             letters.append(letter_data)
+        for position in possible_active_letter_positions:
+            letter = letters[position]["letter"]
+            n_letters_in_true_word = true_word.count(letter)
+            n_busy_letters_in_possible_word = len([
+                item for item in letters
+                if item["letter"] == letter and item["color"] in ("success", "active")
+            ])
+            if n_busy_letters_in_possible_word < n_letters_in_true_word:
+                letters[position]["color"] = "active"
         return letters
