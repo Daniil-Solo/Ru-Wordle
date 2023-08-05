@@ -1,7 +1,7 @@
 import redis
 
 from .models import Word, Game
-from .exceptions import MaxAttemptCountException, NoGameException
+from .exceptions import NoGameException
 from backend.settings import REDIS_HOST, REDIS_PORT, MAX_GAME_TIME, MAX_GAME_ATTEMPT_COUNT
 
 
@@ -60,8 +60,6 @@ class GameService:
     @staticmethod
     def check_word(game_id: str, word: str) -> tuple[bool, bool, list[dict[str: str]], str]:
         current_attempt_number = CacheService.get_current_attempt(game_id)
-        if current_attempt_number > MAX_GAME_ATTEMPT_COUNT:
-            raise MaxAttemptCountException("Превышено максимальное количество попыток")
         CacheService.increase_attempt_count(game_id)
         cached_word = CacheService.get_word(game_id)
         letters_with_status = GameService.get_letters_with_status(cached_word, word)

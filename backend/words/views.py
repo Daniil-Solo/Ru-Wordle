@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from .services import GameService
-from .exceptions import MaxAttemptCountException, NoGameException
+from .exceptions import NoGameException
 from backend.settings import MAX_GAME_TIME
 
 
@@ -26,8 +26,6 @@ def check_word(request):
 
     try:
         success, is_last_attempt, letters_with_status, right_answer = GameService.check_word(game_id, word)
-    except MaxAttemptCountException:
-        return JsonResponse({"message": "Попытки закончились!"}, status=400)
     except NoGameException:
         response = JsonResponse({"message": "Игры не существует или она уже закончилась!"}, status=400)
         response.delete_cookie(game_id)
