@@ -14,6 +14,10 @@ class Word(models.Model):
         verbose_name="Сложность"
     )
 
+    @classmethod
+    def get_random(cls):
+        return cls.objects.order_by("?").first()
+
     def __str__(self):
         return self.name
 
