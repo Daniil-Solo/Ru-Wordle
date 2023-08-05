@@ -1,11 +1,15 @@
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 
 from .services import GameService
 from .exceptions import NoGameException
 from backend.settings import MAX_GAME_TIME
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
 def start_new_game(request):
     game = GameService.create_new_game()
     response = JsonResponse({"message": "Игра создана"}, status=201)
@@ -33,13 +37,19 @@ def check_word(request):
 
     if success:
         GameService.set_victory_status(game_id)
-        response = JsonResponse({"message": "Победа!"})
+        response = JsonResponse({"message": "Победа!", "letters": letters_with_status, "game_status": "victory"})
         response.delete_cookie(game_id)
     elif is_last_attempt:
-        response = JsonResponse({"message": "Проигрыш!", "letters": letters_with_status, "right_answer": right_answer})
+        response = JsonResponse({
+            "message": "Проигрыш!", "letters": letters_with_status,
+            "right_answer": right_answer, "game_status": "loss"
+        })
         response.delete_cookie(game_id)
     else:
-        response = JsonResponse({"message": "Задумано другое слово!", "letters": letters_with_status})
+        response = JsonResponse({
+            "message": "Задумано другое слово!", "letters": letters_with_status,
+            "game_status": "continues"
+        })
     return response
 
 
