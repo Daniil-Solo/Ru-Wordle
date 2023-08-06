@@ -1,5 +1,6 @@
 const tryingCount = 6
 const colorTypes = ["success", "disabled", "active"]
+const maxMinutes = 5
 
 class Game{
     constructor(){
@@ -8,11 +9,18 @@ class Game{
         this.wordView = new WordsView(this.colorSchema)
         this.keyboardView = new KeyboardView(this.colorSchema)
         this.addEventListeners()
+        this.timer = new Timer(this.timeOver)
         this.start()
     }
     start(){
         this.apiHandler.start_new_game()
     }
+
+    timeOver(){
+        // добавить обращение за не угаданным словом
+        alert("Время истекло")
+    }
+
     async checkWord(){
         const word = this.wordView.currentWord.getText()
         const {status, data} = await this.apiHandler.checkWord(word)
@@ -38,9 +46,11 @@ class Game{
                                 this.wordView.paintCells()
                                 switch (result.game_status){
                                     case "loss":
+                                        this.timer.stop()
                                         alert(result.message)
                                         break
                                     case "victory":
+                                        this.timer.stop()
                                         alert(result.message)
                                         break
                                     case "continues":
@@ -69,6 +79,40 @@ class Game{
             })
         });
     }
+}
+
+class Timer{
+    constructor(notifyAboutTimeOver){
+        this.startTime = new Date()
+        this.notifyAboutTimeOver = notifyAboutTimeOver
+        this.timerId = setInterval(() => this.renderTime(), 1000);
+        this.timerElement = document.querySelector("#timer")
+    }
+
+    renderTime(){
+        const currentTime = new Date()
+        const sumSecs = Math.floor((currentTime.getTime() - this.startTime.getTime()) / 1000)
+        const minute = Math.floor(sumSecs / 60)
+        const secs = sumSecs % 60
+        let timeText = null
+        if (minute >= maxMinutes){
+            this.stop()
+            this.notifyAboutTimeOver()
+            timeText = "00:00"
+        } else if (secs === 0){
+            timeText = `0${maxMinutes - minute}:00`
+        } else if (secs > 50) {
+            timeText = `0${maxMinutes - minute - 1}:0${60 - secs}`
+        } else {
+            timeText = `0${maxMinutes - minute - 1}:${60 - secs}`
+        }
+        this.timerElement.innerHTML = timeText
+    }
+
+    stop(){
+        clearInterval(this.timerId)
+    }
+
 }
 
 class APIHandler{
