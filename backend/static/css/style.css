@@ -166,3 +166,10 @@ main{
     background-color: #757575;
     color: #FFF;
 }
+
+/* Таймер */
+#timer{
+    font-weight: 500;
+    font-size: 16pt;
+    margin-top: 4px;
+}
