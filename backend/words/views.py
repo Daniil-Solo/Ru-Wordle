@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
 
 from .services import GameService
 from .exceptions import NoGameException
@@ -17,6 +18,7 @@ def start_new_game(request):
     return response
 
 
+@never_cache
 def check_word(request):
     try:
         word = request.GET["word"]
