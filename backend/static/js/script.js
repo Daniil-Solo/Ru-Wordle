@@ -127,7 +127,7 @@ class APIHandler{
     }
 
     async checkWord(word){
-        let response = await fetch(`/check_word?word=${word}`, {
+        let response = await fetch(`/check_word/?word=${word}`, {
             method: 'GET'
         })
         let data = await response.json()
