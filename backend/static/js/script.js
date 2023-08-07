@@ -4,7 +4,6 @@ const maxMinutes = 5
 
 class Game{
     constructor(){
-        this.apiHandler = new APIHandler()
         this.colorSchema = new ColorSchema()
         this.wordView = new WordsView(this.colorSchema)
         this.keyboardView = new KeyboardView(this.colorSchema)
@@ -13,7 +12,7 @@ class Game{
         this.start()
     }
     start(){
-        this.apiHandler.start_new_game()
+        APIHandler.start_new_game()
     }
 
     timeOver(){
@@ -23,7 +22,7 @@ class Game{
 
     async checkWord(){
         const word = this.wordView.currentWord.getText()
-        const {status, data} = await this.apiHandler.checkWord(word)
+        const {status, data} = await APIHandler.checkWord(word)
         if (status === 200){
             return data
         } else {
@@ -129,22 +128,26 @@ class Timer{
 }
 
 class APIHandler{
-    constructor(){}
+    static async getDataFromResponse(response){
+        let data = await response.json()
+        return {
+            status: response.status,
+            data: data
+        }
+    }
 
-    async start_new_game(){
+    static async start_new_game(){
         let response = await fetch('/start_new_game/', {
             method: 'POST'
         })
-        let data = await response.json()
-        return {status: response.status, data: data}
+        return await APIHandler.getDataFromResponse(response)
     }
 
-    async checkWord(word){
+    static async checkWord(word){
         let response = await fetch(`/check_word/?word=${word}`, {
             method: 'GET'
         })
-        let data = await response.json()
-        return {status: response.status, data: data}
+        return await APIHandler.getDataFromResponse(response)
     }
 }
 
