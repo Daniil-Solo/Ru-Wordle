@@ -4,9 +4,8 @@ const maxMinutes = 5
 
 class Game{
     constructor(){
-        this.colorSchema = new ColorSchema()
         this.wordView = new WordsView(this.colorSchema)
-        this.keyboardView = new KeyboardView(this.colorSchema)
+        this.keyboardColorPainter = new KeyboardColorPainter()
         this.addEventListeners()
         this.timer = new Timer(this.timeOver)
         this.start()
@@ -40,9 +39,8 @@ class Game{
                         if (this.wordView.currentWord.isReadyToCheck()){
                             try{
                                 let result = await this.checkWord()
-                                this.colorSchema.updateColors(result.letters)
-                                this.keyboardView.paintCells()
-                                this.wordView.paintCells(result.letters)
+                                this.keyboardColorPainter.paint(result.letters)
+                                CurrentWordColorPainter.paint(this.wordView.getCurrentCells(), result.letters)
                                 switch (result.game_status){
                                     case "loss":
                                         this.timer.stop()
@@ -154,43 +152,13 @@ class APIHandler{
 class CurrentWordColorPainter{
     static paint(elements, colors){
         elements.forEach((element, index) => {
-            element.classList.remove(...colorTypes)
             element.classList.add(colors[index].color)
         })
     }
 }
 
-class ColorSchema{
-    constructor(){
-        this.data = {}
-        this.current_word_colors = null
-    }
-
-    updateColors(items){
-        this.current_word_colors = items
-        items.forEach(item => {
-            if (!(item.letter.toUpperCase() in this.data)){
-                this.data[item.letter.toUpperCase()] = item.color
-            } else if (this.data[item.letter.toUpperCase()] === "disabled" && (item.color === "active" || item.color === "success")){
-                this.data[item.letter.toUpperCase()] = item.color
-            } else if (this.data[item.letter.toUpperCase()] === "active" &&  item.color === "success"){
-                this.data[item.letter.toUpperCase()] = item.color
-            }
-        })
-    }
-
-    getColorBySymbol(symbol){
-        return this.data[symbol]
-    }
-
-    getColorByPositionInWord(position){
-        return this.current_word_colors[position].color
-    }
-
-}
-
 class WordsView{
-    constructor(colorSchema){
+    constructor(){
         this.tryingNumber = 1
         this.currentWord = new CurrentWord()
         this.showCurrentCell()
@@ -232,11 +200,6 @@ class WordsView{
             currentCell.innerHTML = currentSymbol
         })
     }
-    
-    paintCells(colors){
-        const currentCells = this.getCurrentCells()
-        CurrentWordColorPainter.paint(currentCells, colors)
-    }
 
     showErrorWhereEmptySymbols(){
         const currentCells = this.getCurrentCells()
@@ -252,18 +215,38 @@ class WordsView{
     }
 }
 
-class KeyboardView{
+class KeyboardColorPainter{
     constructor(colorSchema){
-        this.colorSchema = colorSchema
+        this.colorSchema = {}
+        this.elements = document.querySelectorAll(".keyboard__row__item")
     }
 
-    paintCells(){
-        const keyElements = document.querySelectorAll(".keyboard__row__item")
-        keyElements.forEach(keyElement => {
-            let currentSymbol = keyElement.innerText
-            let color = this.colorSchema.getColorBySymbol(currentSymbol)
+    paint(letterList){
+        this.updateColors(letterList)
+        this.paintElements()
+    }
+
+    updateColors(letterList){
+        letterList.forEach(letterItem => {
+            const letter = letterItem.letter.toUpperCase()
+            const color = letterItem.color
+            if (!(letter in this.colorSchema)){
+                this.colorSchema[letter] = color
+            } else if (this.colorSchema[letter] === "disabled" && (color === "active" || color === "success")){
+                this.colorSchema[letter] = color
+            } else if (this.colorSchema[letter] === "active" &&  color === "success"){
+                this.colorSchema[letter] = color
+            }
+        })
+    }
+
+    paintElements(){
+        this.elements.forEach(element => {
+            const currentSymbol = element.innerText
+            const color = this.colorSchema[currentSymbol]
             if (color !== undefined){
-                keyElement.classList.add(color)
+                element.classList.remove(...colorTypes)
+                element.classList.add(color)
             } 
         })
     }
