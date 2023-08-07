@@ -42,7 +42,7 @@ class Game{
                                 let result = await this.checkWord()
                                 this.colorSchema.updateColors(result.letters)
                                 this.keyboardView.paintCells()
-                                this.wordView.paintCells()
+                                this.wordView.paintCells(result.letters)
                                 switch (result.game_status){
                                     case "loss":
                                         this.timer.stop()
@@ -151,6 +151,15 @@ class APIHandler{
     }
 }
 
+class CurrentWordColorPainter{
+    static paint(elements, colors){
+        elements.forEach((element, index) => {
+            element.classList.remove(...colorTypes)
+            element.classList.add(colors[index].color)
+        })
+    }
+}
+
 class ColorSchema{
     constructor(){
         this.data = {}
@@ -184,7 +193,6 @@ class WordsView{
     constructor(colorSchema){
         this.tryingNumber = 1
         this.currentWord = new CurrentWord()
-        this.colorSchema = colorSchema
         this.showCurrentCell()
     }
 
@@ -225,16 +233,9 @@ class WordsView{
         })
     }
     
-    paintCells(){
+    paintCells(colors){
         const currentCells = this.getCurrentCells()
-        currentCells.forEach((currentCell, index) => {
-            let currentSymbol = this.currentWord.data[index]
-            let color = this.colorSchema.getColorByPositionInWord(index)
-            if (color !== undefined){
-                currentCell.classList.remove(...colorTypes)
-                currentCell.classList.add(color)
-            }
-        })
+        CurrentWordColorPainter.paint(currentCells, colors)
     }
 
     showErrorWhereEmptySymbols(){
