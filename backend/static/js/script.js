@@ -4,14 +4,22 @@ const maxMinutes = 5
 
 class Game{
     constructor(){
-        this.wordView = new WordsView(this.colorSchema)
+        this.tryingNumber = 1
         this.keyboardColorPainter = new KeyboardColorPainter()
-        this.addEventListeners()
+        this.currentWordPainter = new CurrentWordPainter(WordView.getCurrentWordElements(this.tryingNumber))
         this.timer = new Timer(this.timeOver)
+        this.addEventListeners()
         this.start()
     }
     start(){
         APIHandler.start_new_game()
+    }
+
+    startNextTrying(){
+        if (this.tryingNumber < tryingCount){
+            this.tryingNumber += 1
+            this.currentWordPainter = new CurrentWordPainter(WordView.getCurrentWordElements(this.tryingNumber))
+        }
     }
 
     timeOver(){
@@ -19,8 +27,7 @@ class Game{
         alert("Время истекло")
     }
 
-    async checkWord(){
-        const word = this.wordView.currentWord.getText()
+    async checkWord(word){
         const {status, data} = await APIHandler.checkWord(word)
         if (status === 200){
             return data
@@ -33,14 +40,15 @@ class Game{
         const buttons = document.querySelectorAll(".keyboard__row__item")
         buttons.forEach(button => {
             button.addEventListener("click", async event => {
-                let buttonType = button.dataset?.action
+                const buttonType = button.dataset?.action
                 switch(buttonType){
                     case "check":
-                        if (this.wordView.currentWord.isReadyToCheck()){
+                        if (this.currentWordPainter.currentWord.isReadyToCheck()){
                             try{
-                                let result = await this.checkWord()
+                                const word = this.currentWordPainter.currentWord.getText()
+                                const result = await this.checkWord(word)
                                 this.keyboardColorPainter.paint(result.letters)
-                                CurrentWordColorPainter.paint(this.wordView.getCurrentCells(), result.letters)
+                                CurrentWordColorPainter.paint(WordView.getCurrentWordElements(this.tryingNumber), result.letters)
                                 switch (result.game_status){
                                     case "loss":
                                         this.timer.stop()
@@ -51,27 +59,27 @@ class Game{
                                         alert(result.message)
                                         break
                                     case "continues":
-                                        this.wordView.startNextTrying()
+                                        this.startNextTrying()
                                 }
                             } catch(e){
                                 alert(e.message)
                             }
                         } else {
-                            this.wordView.showErrorWhereEmptySymbols()
+                            this.currentWordPainter.showErrorWhereEmptySymbols()
                         }
                         break
                     case "clear":
-                        this.wordView.currentWord.clear()
-                        this.wordView.renderCurrentWord()
+                        this.currentWordPainter.currentWord.clear()
+                        this.currentWordPainter.paint()
                         break
                     case "delete":
-                        this.wordView.currentWord.deleteRightSymbol()
-                        this.wordView.renderCurrentWord()
+                        this.currentWordPainter.currentWord.deleteRightSymbol()
+                        this.currentWordPainter.paint()
                         break
                     default:
                         let symbol = event.srcElement.innerText
-                        this.wordView.currentWord.addSymbol(symbol)
-                        this.wordView.renderCurrentWord()
+                        this.currentWordPainter.currentWord.addSymbol(symbol)
+                        this.currentWordPainter.paint()
                 }
             })
         });
@@ -157,61 +165,52 @@ class CurrentWordColorPainter{
     }
 }
 
-class WordsView{
-    constructor(){
-        this.tryingNumber = 1
+class CurrentWordPainter{
+    constructor(elements){
         this.currentWord = new CurrentWord()
+        this.elements = elements
         this.showCurrentCell()
     }
 
-    startNextTrying(){
-        if (this.tryingNumber < tryingCount){
-            this.tryingNumber += 1
-            this.currentWord.clear()
-            this.showCurrentCell()
-        }
-    }
-
-    renderCurrentWord(){
+    paint(){
+        this.showCurrentCell()
         this.showCurrentText()
-        this.showCurrentCell()
-    }
-
-    getCurrentCells(){
-        const wordRows = document.querySelectorAll(".words__row")
-        const currentCells = [...wordRows[this.tryingNumber - 1].children]
-        return currentCells
     }
 
     showCurrentCell(){
-        const currentCells = this.getCurrentCells()
-        currentCells.forEach((currentCell, index) => {
-            currentCell.classList.remove("current")
-            if (index === this.currentWord.index){
-                currentCell.classList.add("current")
-            } 
+        this.elements.forEach((element, index) => {
+            element.classList.remove("current")
+            if (index === this.currentWord.getIndexEmptySymbol()){
+                element.classList.add("current")
+            }
         })
     }
 
     showCurrentText(){
-        const currentCells = this.getCurrentCells()
-        currentCells.forEach((currentCell, index) => {
+        this.elements.forEach((element, index) => {
             let currentSymbol = this.currentWord.data[index]
-            currentCell.innerHTML = currentSymbol
+            element.innerHTML = currentSymbol
         })
     }
 
     showErrorWhereEmptySymbols(){
-        const currentCells = this.getCurrentCells()
-        this.currentWord.data.forEach((currentSymbol, index) => {
+        this.currentWord.getSymbolList.forEach((currentSymbol, index) => {
             if (currentSymbol === ""){
-                currentCells[index].classList.add("empty_symbol_error")
+                this.elements[index].classList.add("empty_symbol_error")
                 setTimeout(() => {
-                    currentCells[index].classList.remove("empty_symbol_error")
+                    this.elements[index].classList.remove("empty_symbol_error")
                 }, 500)
-                
+
             }
         })
+    }
+}
+
+class WordView{
+    static getCurrentWordElements(tryingNumber){
+        const wordRows = document.querySelectorAll(".words__row")
+        const currentWordElements = [...wordRows[tryingNumber - 1].children]
+        return currentWordElements
     }
 }
 
@@ -258,6 +257,14 @@ class CurrentWord {
         this.index = null
         this.data = null
         this.clear()
+    }
+
+    getSymbolList(){
+        return this.data
+    }
+
+    getIndexEmptySymbol(){
+        return this.index
     }
 
     isReadyToCheck(){
