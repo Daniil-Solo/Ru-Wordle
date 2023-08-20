@@ -1,8 +1,9 @@
 import redis
+from redis.exceptions import ConnectionError
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Word, Game
-from .exceptions import NoGameException
+from .exceptions import NoGameException, NoCacheConnectionException
 from backend.settings import REDIS_HOST, REDIS_PORT, MAX_GAME_TIME, MAX_GAME_ATTEMPT_COUNT
 
 
@@ -12,34 +13,49 @@ redis_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 class CacheService:
     @staticmethod
     def add_new_game(game_id: str, word: str) -> None:
-        redis_storage.set(game_id, word, ex=MAX_GAME_TIME)
-        attempt_count_key = game_id + "_cnt"
-        redis_storage.set(attempt_count_key, 0, ex=MAX_GAME_TIME)
+        try:
+            redis_storage.set(game_id, word, ex=MAX_GAME_TIME)
+            attempt_count_key = game_id + "_cnt"
+            redis_storage.set(attempt_count_key, 0, ex=MAX_GAME_TIME)
+        except ConnectionError:
+            raise NoCacheConnectionException
 
     @staticmethod
     def delete_game(game_id: str) -> None:
-        redis_storage.delete(game_id)
-        attempt_count_key = game_id + "_cnt"
-        redis_storage.delete(attempt_count_key)
-
+        try:
+            redis_storage.delete(game_id)
+            attempt_count_key = game_id + "_cnt"
+            redis_storage.delete(attempt_count_key)
+        except ConnectionError:
+            raise NoCacheConnectionException
+        
     @staticmethod
     def get_current_attempt(game_id: str) -> int:
-        attempt_count_key = game_id + "_cnt"
-        previous_attempt_number = redis_storage.get(attempt_count_key)
-        if previous_attempt_number is None:
-            raise NoGameException
-        previous_attempt_number = int(previous_attempt_number.decode())
-        current_attempt_number = previous_attempt_number + 1
-        return current_attempt_number
+        try:
+            attempt_count_key = game_id + "_cnt"
+            previous_attempt_number = redis_storage.get(attempt_count_key)
+            if previous_attempt_number is None:
+                raise NoGameException
+            previous_attempt_number = int(previous_attempt_number.decode())
+            current_attempt_number = previous_attempt_number + 1
+            return current_attempt_number
+        except ConnectionError:
+            raise NoCacheConnectionException
 
     @staticmethod
     def increase_attempt_count(game_id: str) -> None:
-        attempt_count_key = game_id + "_cnt"
-        redis_storage.incrby(attempt_count_key, 1)
+        try:
+            attempt_count_key = game_id + "_cnt"
+            redis_storage.incrby(attempt_count_key, 1)
+        except ConnectionError:
+            raise NoCacheConnectionException
 
     @staticmethod
     def get_word(game_id: str) -> str:
-        return redis_storage.get(game_id).decode()
+        try:
+            return redis_storage.get(game_id).decode()
+        except ConnectionError:
+            raise NoCacheConnectionException
 
 
 class GameService:

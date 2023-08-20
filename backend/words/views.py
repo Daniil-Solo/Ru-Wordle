@@ -5,14 +5,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.cache import never_cache
 
 from .services import GameService
-from .exceptions import NoGameException
+from .exceptions import NoGameException, NoCacheConnectionException
 from backend.settings import MAX_GAME_TIME
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def start_new_game(request):
-    game = GameService.create_new_game()
+    try:
+        game = GameService.create_new_game()
+    except NoCacheConnectionException:
+        return JsonResponse({"message": "Сервис временно недоступен!"}, status=503)
     response = JsonResponse({"message": "Игра создана"}, status=201)
     response.set_cookie("game_id", game.id, max_age=MAX_GAME_TIME, httponly=True)
     return response
@@ -36,7 +39,8 @@ def check_word(request):
         response = JsonResponse({"message": "Игры не существует или она уже закончилась!"}, status=400)
         response.delete_cookie("game_id")
         return response
-
+    except NoCacheConnectionException:
+        return JsonResponse({"message": "Сервис временно недоступен!"}, status=503)
     if success:
         GameService.set_victory_status(game_id)
         response = JsonResponse({"message": "Победа!", "letters": letters_with_status, "game_status": "victory"})
