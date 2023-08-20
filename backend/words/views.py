@@ -42,6 +42,7 @@ def check_word(request):
         response = JsonResponse({"message": "Победа!", "letters": letters_with_status, "game_status": "victory"})
         response.delete_cookie(game_id)
     elif is_last_attempt:
+        GameService.set_attempt_ended_status(game_id)
         response = JsonResponse({
             "message": "Проигрыш!", "letters": letters_with_status,
             "right_answer": right_answer, "game_status": "loss"

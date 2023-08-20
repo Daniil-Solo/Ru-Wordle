@@ -58,6 +58,13 @@ class GameService:
         CacheService.delete_game(game_id)
 
     @staticmethod
+    def set_attempt_ended_status(game_id: str) -> None:
+        game = Game.objects.get(id=game_id)
+        game.status = Game.Status.ATTEMPT_ENDED
+        game.save()
+        CacheService.delete_game(game_id)
+
+    @staticmethod
     def check_word(game_id: str, word: str) -> tuple[bool, bool, list[dict[str: str]], str]:
         current_attempt_number = CacheService.get_current_attempt(game_id)
         CacheService.increase_attempt_count(game_id)
