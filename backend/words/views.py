@@ -56,5 +56,20 @@ def check_word(request):
     return response
 
 
+@never_cache
+def get_word_after_ending_game(request):
+    try:
+        game_id = request.COOKIES["game_id"]
+        right_answer = GameService.get_right_answer(game_id)
+    except (KeyError, NoGameException):
+        return JsonResponse({"message": "Игры не существует!"}, status=400)
+
+    response = JsonResponse({
+        "message": f"Правильное слово было {right_answer}"
+    })
+    response.delete_cookie("game_id")
+    return response
+
+
 def home_page(request):
     return render(request, "words/index.html")

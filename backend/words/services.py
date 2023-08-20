@@ -1,4 +1,5 @@
 import redis
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Word, Game
 from .exceptions import NoGameException
@@ -63,6 +64,17 @@ class GameService:
         game.status = Game.Status.ATTEMPT_ENDED
         game.save()
         CacheService.delete_game(game_id)
+
+    @staticmethod
+    def get_right_answer(game_id: str) -> str:
+        try:
+            game = Game.objects.get(id=game_id)
+        except ObjectDoesNotExist:
+            raise NoGameException
+        if game.status == Game.Status.IN_PROCESS:
+            game.status = Game.Status.TIME_OVER
+            game.save()
+        return game.word
 
     @staticmethod
     def check_word(game_id: str, word: str) -> tuple[bool, bool, list[dict[str: str]], str]:
