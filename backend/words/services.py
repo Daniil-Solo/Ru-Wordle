@@ -52,17 +52,19 @@ class GameService:
         return game
 
     @staticmethod
-    def set_victory_status(game_id: str) -> None:
+    def _set_new_status(game_id: str, new_status: Game.Status) -> None:
         game = Game.objects.get(id=game_id)
-        game.status = Game.Status.VICTORY
+        game.status = new_status
         game.save()
+
+    @staticmethod
+    def set_victory_status(game_id: str) -> None:
+        GameService._set_new_status(game_id, Game.Status.VICTORY)
         CacheService.delete_game(game_id)
 
     @staticmethod
     def set_attempt_ended_status(game_id: str) -> None:
-        game = Game.objects.get(id=game_id)
-        game.status = Game.Status.ATTEMPT_ENDED
-        game.save()
+        GameService._set_new_status(game_id, Game.Status.ATTEMPT_ENDED)
         CacheService.delete_game(game_id)
 
     @staticmethod
