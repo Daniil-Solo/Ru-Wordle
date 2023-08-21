@@ -22,9 +22,13 @@ class Game{
         }
     }
 
-    timeOver(){
-        // добавить обращение за не угаданным словом
-        alert("Время истекло")
+    async timeOver(){
+        const {status, data} = await APIHandler.getRightWordAfterEndingGame()
+        if (status === 200){
+            alert(data.message)
+        } else {
+            throw new Error(data.message)
+        }
     }
 
     async checkWord(word){
@@ -155,6 +159,13 @@ class APIHandler{
         })
         return await APIHandler.getDataFromResponse(response)
     }
+
+    static async getRightWordAfterEndingGame(){
+        let response = await fetch('/get_word_after_ending_game/', {
+            method: 'GET'
+        })
+        return await APIHandler.getDataFromResponse(response)
+    }
 }
 
 class CurrentWordColorPainter{
@@ -194,7 +205,7 @@ class CurrentWordPainter{
     }
 
     showErrorWhereEmptySymbols(){
-        this.currentWord.getSymbolList.forEach((currentSymbol, index) => {
+        this.currentWord.getSymbolList().forEach((currentSymbol, index) => {
             if (currentSymbol === ""){
                 this.elements[index].classList.add("empty_symbol_error")
                 setTimeout(() => {
